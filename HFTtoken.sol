@@ -1,5 +1,4 @@
 
-//SPDX-License-Identifier: UNLICENSED
 /*
 
 HODL.Finance is built upon the CeDeFi fundamentals of reflection and a nonprofit foundation.
@@ -22,10 +21,7 @@ HODL.Finance features:
 
 */
 
-
-// SPDX-License-Identifier: Unlicensed
-
-
+//SPDX-License-Identifier:Unlicensed
 pragma solidity ^0.8.4;
 
 interface IERC20 {
@@ -716,8 +712,8 @@ contract HFTtoken is Context, IBEP20 {
     uint256 private constant T_TOTAL = 210000 * 10**6 * 10**TOKEN_DECIMALS;
     uint256 private constant MAX_BNB_TO_ADD_TO_LP = 2200 * 10**18;
     uint256 public constant MAX_TX_AMOUNT = 420 * 10**6 * 10**TOKEN_DECIMALS;
-    uint256 private constant NUM_TOKENS_SELL_TO_ADD_TO_LP = 1 * 10**6 * 10**TOKEN_DECIMALS;
-    uint256 private constant NUM_TOKENS_SELL_TO_SEND_TO_FOUNDATION = 1 * 10**6 * 10**TOKEN_DECIMALS;
+    uint256 private constant NUM_TOKENS_SELL_TO_ADD_TO_LP = 10 * 10**6 * 10**TOKEN_DECIMALS;
+    uint256 private constant NUM_TOKENS_SELL_TO_SEND_TO_FOUNDATION = 15 * 10**6 * 10**TOKEN_DECIMALS;
     uint256 private constant MIN_BNB_AMOUNT_TO_SEND_TO_FOUNDATION = 1 * 10**18; //1 bnb
     /*   END OF CONFIGURATION   */
 
@@ -743,8 +739,8 @@ contract HFTtoken is Context, IBEP20 {
     address constant WALLET_TREASURY    = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
     address constant WALLET_FOUNDATION  = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
     address constant PANCAKE_V2_ROUTER_ADDRESS  = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
-    string private constant TOKEN_NAME = "A_05";
-    string private constant TOKEN_SYMBOL = "A_05";
+    string private constant TOKEN_NAME = "A_06";
+    string private constant TOKEN_SYMBOL = "A_06";
     uint8 private constant TOKEN_DECIMALS = 9;
     uint256 private constant T_TOTAL = 210000 * 10**6 * 10**TOKEN_DECIMALS;
     uint256 private constant MAX_BNB_TO_ADD_TO_LP = 2200 * 10**14; //10^-4 scale
@@ -780,7 +776,7 @@ contract HFTtoken is Context, IBEP20 {
 
     uint256 public numBnbAddedToLiquidity;
 
-    uint256 public foundationCollectedBalance;
+    uint256 public foundationCollectedRBalance;
 
     IUniswapV2Router02 public immutable pancakeV2Router;
     address public immutable pancakeV2Pair;
@@ -1171,7 +1167,7 @@ contract HFTtoken is Context, IBEP20 {
         if (isExcludedFromReward[address(this)]) { // Shall not be excluded
             tOwned[address(this)] = tOwned[address(this)].add(_tFoundation);
         }
-        foundationCollectedBalance = foundationCollectedBalance.add(_rFoundation);
+        foundationCollectedRBalance = foundationCollectedRBalance.add(_rFoundation);
     }
 
     function _removeAllFee() private {
@@ -1213,13 +1209,14 @@ contract HFTtoken is Context, IBEP20 {
             _from != pancakeV2Pair
         ) {
             uint256 contractBalance = balanceOf(address(this));
-            if (foundationCollectedBalance < contractBalance) {
-                contractBalance = foundationCollectedBalance;
+            uint256 foundationCollectedTokenBalance = tokenFromReflection(foundationCollectedRBalance);
+            if (foundationCollectedTokenBalance < contractBalance) {
+                contractBalance = foundationCollectedTokenBalance;
             }
 
             bool overMinTokenBalance = contractBalance >= NUM_TOKENS_SELL_TO_SEND_TO_FOUNDATION;
             if (overMinTokenBalance) {
-                foundationCollectedBalance = foundationCollectedBalance.sub(NUM_TOKENS_SELL_TO_SEND_TO_FOUNDATION);
+                foundationCollectedRBalance = foundationCollectedRBalance.sub(reflectionFromToken(NUM_TOKENS_SELL_TO_SEND_TO_FOUNDATION, false));
                 _swapTokensForBnb(NUM_TOKENS_SELL_TO_SEND_TO_FOUNDATION);
             }
         }
@@ -1250,16 +1247,15 @@ contract HFTtoken is Context, IBEP20 {
      * Requirements: NUM_TOKENS_SELL_TO_ADD_TO_LP <= MAX_TX_AMOUNT
      */
     function _liquify(address _from) private returns(bool) {
-
-
         if (
             !inSwapAndLiquify &&
             _from != pancakeV2Pair   // token buyer is not paying extra gas for this extra operation
         ) {
             uint256 contractTokenBalanceToUse = balanceOf(address(this));
+            uint256 foundationCollectedTokenBalance = tokenFromReflection(foundationCollectedRBalance);
             
-            if (foundationCollectedBalance <= contractTokenBalanceToUse) {
-                contractTokenBalanceToUse = contractTokenBalanceToUse.sub(foundationCollectedBalance);
+            if (foundationCollectedTokenBalance <= contractTokenBalanceToUse) {
+                contractTokenBalanceToUse = contractTokenBalanceToUse.sub(foundationCollectedTokenBalance);
             }
             
             bool overMinTokenBalance = contractTokenBalanceToUse >= NUM_TOKENS_SELL_TO_ADD_TO_LP;
@@ -1292,7 +1288,8 @@ contract HFTtoken is Context, IBEP20 {
 
         // add collected tokens to liquidity pool.
         bool liquify_executed;
-        liquify_executed = _liquify(_from);
+        if (!inSwapForFoundation)
+            liquify_executed = _liquify(_from);
         // convert collected tokens to BNB and transfer to Foundation.
         if (!liquify_executed && !inSwapAndLiquify)
             _foundation(_from);
@@ -1604,6 +1601,14 @@ contract HFTtoken is Context, IBEP20 {
 
     function totalSupply() public pure override returns (uint256) {
         return T_TOTAL;
+    }
+    
+    function tokensCollectedForFoundation() public view returns (uint256) {
+        return (tokenFromReflection(foundationCollectedRBalance));
+    }
+
+    function tokensCollectedForLpAndFoundation() public view returns (uint256) {
+        return (balanceOf(address(this)));
     }
 
     /**
