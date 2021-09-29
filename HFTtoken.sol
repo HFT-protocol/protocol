@@ -784,7 +784,7 @@ contract HFTtoken is Context, IBEP20 {
     /******************************************************************
      *          EVENTS
      ******************************************************************/
-    event SwapAndLiquify(uint256 tokensSwapped, uint256 bnbReceived, uint256 tokensIntoLiqudity);
+    event SwapAndLiquify(uint256 tokensSwapped, uint256 bnbReceived, uint256 tokensIntoLiquidity);
     event BnbBurned (uint256 _amount);
     event SendToFoundation (uint256 _bnbAmount);
 
