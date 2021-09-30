@@ -845,12 +845,14 @@ contract HFTtoken is Context, IBEP20 {
 
         // Mark excluded from Reward wallets
         // All wallets, which are excluded from reward, shall keep their balances in tAmount.
+        excludedFromReward.push(pancakeV2Pair);
         excludedFromReward.push(WALLET_TREASURY);
         excludedFromReward.push(WALLET_AIRDROP);
         excludedFromReward.push(WALLET_LP_SUPPLY);
         excludedFromReward.push(WALLET_DEV);
         excludedFromReward.push(WALLET_ADVISORS);
         excludedFromReward.push(WALLET_TEAM);
+        isExcludedFromReward[pancakeV2Pair]  = true;
         isExcludedFromReward[WALLET_TREASURY]  = true;
         isExcludedFromReward[WALLET_AIRDROP]   = true;
         isExcludedFromReward[WALLET_LP_SUPPLY] = true;
