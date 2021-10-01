@@ -22,7 +22,7 @@ HODL.Finance features:
 */
 
 //SPDX-License-Identifier:Unlicensed
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 interface IERC20 {
 
@@ -286,154 +286,6 @@ abstract contract Context {
     }
 }
 
-/**
- * @dev Collection of functions related to the address type
- */
-library Address {
-    /**
-     * @dev Returns true if `account` is a contract.
-     *
-     * [IMPORTANT]
-     * ====
-     * It is unsafe to assume that an address for which this function returns
-     * false is an externally-owned account (EOA) and not a contract.
-     *
-     * Among others, `isContract` will return false for the following
-     * types of addresses:
-     *
-     *  - an externally-owned account
-     *  - a contract in construction
-     *  - an address where a contract will be created
-     *  - an address where a contract lived, but was destroyed
-     * ====
-     */
-    function isContract(address account) internal view returns (bool) {
-        // This method relies on extcodesize, which returns 0 for contracts in
-        // construction, since the code is only stored at the end of the
-        // constructor execution.
-
-        uint256 size;
-        assembly {
-            size := extcodesize(account)
-        }
-
-        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
-        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
-        // for accounts without code, i.e. `keccak256('')`
-        bytes32 codehash;
-        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
-        // solhint-disable-next-line no-inline-assembly
-        assembly { codehash := extcodehash(account) }
-
-        return(size > 0 && codehash != accountHash && codehash != 0x0);
-    }
-
-    /**
-     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
-     * `recipient`, forwarding all available gas and reverting on errors.
-     *
-     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
-     * of certain opcodes, possibly making contracts go over the 2300 gas limit
-     * imposed by `transfer`, making them unable to receive funds via
-     * `transfer`. {sendValue} removes this limitation.
-     *
-     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].
-     *
-     * IMPORTANT: because control is transferred to `recipient`, care must be
-     * taken to not create reentrancy vulnerabilities. Consider using
-     * {ReentrancyGuard} or the
-     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
-     */
-    function sendValue(address payable recipient, uint256 amount) internal {
-        require(address(this).balance >= amount, "Address: insufficient balance");
-
-        // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = recipient.call{ value: amount }("");
-        require(success, "Address: unable to send value, recipient may have reverted");
-    }
-
-    /**
-     * @dev Performs a Solidity function call using a low level `call`. A
-     * plain`call` is an unsafe replacement for a function call: use this
-     * function instead.
-     *
-     * If `target` reverts with a revert reason, it is bubbled up by this
-     * function (like regular Solidity function calls).
-     *
-     * Returns the raw returned data. To convert to the expected return value,
-     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
-     *
-     * Requirements:
-     *
-     * - `target` must be a contract.
-     * - calling `target` with `data` must not revert.
-     *
-     * _Available since v3.1._
-     */
-    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
-        return functionCall(target, data, "Address: low-level call failed");
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with
-     * `errorMessage` as a fallback revert reason when `target` reverts.
-     *
-     * _Available since v3.1._
-     */
-    function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
-        return _functionCallWithValue(target, data, 0, errorMessage);
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but also transferring `value` wei to `target`.
-     *
-     * Requirements:
-     *
-     * - the calling contract must have an ETH balance of at least `value`.
-     * - the called Solidity function must be `payable`.
-     *
-     * _Available since v3.1._
-     */
-    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but
-     * with `errorMessage` as a fallback revert reason when `target` reverts.
-     *
-     * _Available since v3.1._
-     */
-    function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {
-        require(address(this).balance >= value, "Address: insufficient balance for call");
-        return _functionCallWithValue(target, data, value, errorMessage);
-    }
-
-    function _functionCallWithValue(address target, bytes memory data, uint256 weiValue, string memory errorMessage) private returns (bytes memory) {
-        require(isContract(target), "Address: call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{ value: weiValue }(data);
-        if (success) {
-            return returndata;
-        } else {
-            // Look for revert reason and bubble it up if present
-            if (returndata.length > 0) {
-                // The easiest way to bubble the revert reason is using memory via assembly
-
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    let returndata_size := mload(returndata)
-                    revert(add(32, returndata), returndata_size)
-                }
-            } else {
-                revert(errorMessage);
-            }
-        }
-    }
-}
-
 
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
@@ -640,7 +492,6 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
 
 contract HFTtoken is Context, IBEP20 {
     using SafeMath for uint256;
-    using Address for address;
 
     /******************************************************************
      *          CUSTOM DATA TYPES
@@ -763,7 +614,7 @@ contract HFTtoken is Context, IBEP20 {
     uint256 private tFeeTotal;
 
     // TokenFromReflection rate, valid for the moment of distribution. Used for locked wallets, excluded from rewards
-    uint256 private initialTokenFromReflectionRate = rTotal / T_TOTAL;
+    uint256 private initialTokenFromReflectionRate = rTotal.div(T_TOTAL);
 
     uint8 public  reflectionFee = 2;
     uint8 private previousReflectionFee = reflectionFee;
@@ -779,7 +630,7 @@ contract HFTtoken is Context, IBEP20 {
     uint256 public foundationCollectedRBalance;
 
     IUniswapV2Router02 public immutable pancakeV2Router;
-    address public immutable pancakeV2Pair;
+    address public pancakeV2Pair;
 
     /******************************************************************
      *          EVENTS
@@ -882,14 +733,14 @@ contract HFTtoken is Context, IBEP20 {
         uint256 _rToDistribute = rTotal;
 
         // 50% goes to _walletAirdrop
-        rAmountToDistribute = rTotal / 100 * 50;
+        rAmountToDistribute = rTotal.div(100).mul(50);
         _dropInitialTokens(WALLET_AIRDROP, rAmountToDistribute);
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         // 10% goes to LpSupply
-        rAmountToDistribute = rTotal / 100 * 10;
+        rAmountToDistribute = rTotal.div(100).mul(10);
         _dropInitialTokens(WALLET_LP_SUPPLY, rAmountToDistribute);
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         // The rest will be distributed as locked funds
         // Create array of locked wallets
@@ -910,64 +761,64 @@ contract HFTtoken is Context, IBEP20 {
         assert(lockedWallets.length == 13);
 
         // 15% goes to 10 Investors (each get 1.5%)
-        rAmountToDistribute = rTotal / 100 * 15 / 10;
+        rAmountToDistribute = rTotal.div(100).mul(15).div(10);
         // all 10 investors have the same unlock setup
         lockedBalanceStruct memory _lockedInvestorBalance = lockedBalanceStruct(
             rAmountToDistribute,                    // lockedBalance
             30 days,                                // nextLockInterval
-            block.timestamp + 6*30 days,            // lockedUntill. Initial lock 6 months
-            rAmountToDistribute / 24                // unlockAmount - linear unlock period 24 months
+            block.timestamp.add(6 * 30 days),            // lockedUntill. Initial lock 6 months
+            rAmountToDistribute.div(24)                // unlockAmount - linear unlock period 24 months
         );
         lockedBalances[WALLET_INVESTOR1] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR2] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR3] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR4] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR5] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR6] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR7] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR8] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR9] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR10] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         // 10% goes to Dev/marketing
-        rAmountToDistribute = rTotal / 100 * 10;
+        rAmountToDistribute = rTotal.div(100).mul(10);
         lockedBalances[WALLET_DEV] = lockedBalanceStruct(
             rAmountToDistribute ,                   // lockedBalance
             30 days,                                // nextLockInterval
             block.timestamp + 7 days,               // lockedUntill. Initial lock for 7 days
-            rAmountToDistribute / 24                // unlockAmount - linear unlock period 24 months
+            rAmountToDistribute.div(24)                // unlockAmount - linear unlock period 24 months
         );
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         // 5% goes to Advisors
-        rAmountToDistribute = rTotal / 100 * 5;
+        rAmountToDistribute = rTotal.div(100).mul(5);
         lockedBalances[WALLET_ADVISORS] = lockedBalanceStruct(
             rAmountToDistribute ,                   // lockedBalance
             30 days,                                // nextLockInterval
             block.timestamp,                        // lockedUntill. No initial lock
-            rAmountToDistribute / 24                // unlockAmount - linear unlock period 24 months
+            rAmountToDistribute.div(24)                // unlockAmount - linear unlock period 24 months
         );
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
          // 10% goes to Team
-        rAmountToDistribute = rTotal / 100 * 10;
+        rAmountToDistribute = rTotal.div(100).mul(10);
         lockedBalances[WALLET_TEAM] = lockedBalanceStruct(
             rAmountToDistribute ,                   // lockedBalance
             30 days,                                // nextLockInterval
-            block.timestamp + 6 * 30 days,          // lockedUntill. Initial lock for 6 months
-            rAmountToDistribute / 24                // unlockAmount - linear unlock period 24 months
+            block.timestamp.add(6 * 30 days),          // lockedUntill. Initial lock for 6 months
+            rAmountToDistribute.div(24)                // unlockAmount - linear unlock period 24 months
         );
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         // Token emission shall be completely distributed
         assert (_rToDistribute == 0);
@@ -981,14 +832,14 @@ contract HFTtoken is Context, IBEP20 {
         uint256 _rToDistribute = rTotal;
 
         //50% goes to _walletAirdrop
-        rAmountToDistribute = rTotal / 100 * 50;
+        rAmountToDistribute = rTotal.div(100).mul(50);
         _dropInitialTokens(WALLET_AIRDROP, rAmountToDistribute);   
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         //10% goes to LpSupply
-        rAmountToDistribute = rTotal / 100 * 10;
+        rAmountToDistribute = rTotal.div(100).mul(10);
         _dropInitialTokens(WALLET_LP_SUPPLY, rAmountToDistribute);   
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         //The rest will be distributed as locked funds
         //Create array of locked wallets
@@ -1009,64 +860,64 @@ contract HFTtoken is Context, IBEP20 {
         assert(lockedWallets.length == 13);
 
         //15% goes to 10 Investors (each get 1.5%)
-        rAmountToDistribute = rTotal / 100 * 15 / 10;
+        rAmountToDistribute = rTotal.div(100).mul(15).div(10);
         //all 10 investors have the same unlock setup
         lockedBalanceStruct memory _lockedInvestorBalance = lockedBalanceStruct(
             rAmountToDistribute,          //lockedBalance
             1 hours,                      //nextLockInterval
             block.timestamp + 1 hours,  //lockedUntill. Initial lock 6 months
-            rAmountToDistribute / 24      //unlockAmount - linear unlock period 24 months
+            rAmountToDistribute.div(24)      //unlockAmount - linear unlock period 24 months
         );
         lockedBalances[WALLET_INVESTOR1] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR2] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR3] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR4] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR5] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR6] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR7] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR8] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR9] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         lockedBalances[WALLET_INVESTOR10] = _lockedInvestorBalance;
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         //10% goes to Dev/marketing
-        rAmountToDistribute = rTotal / 100 * 10;    
+        rAmountToDistribute = rTotal.div(100).mul(10);    
         lockedBalances[WALLET_DEV] = lockedBalanceStruct(
             rAmountToDistribute ,           //lockedBalance
             1 hours,                        //nextLockInterval
-            block.timestamp + 1 hours,       //lockedUntill. No initial lock
-            rAmountToDistribute / 24        //unlockAmount - linear unlock period 24 months           
+            block.timestamp.add(1 hours),       //lockedUntill. No initial lock
+            rAmountToDistribute.div(24)        //unlockAmount - linear unlock period 24 months           
         );
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
         //5% goes to Advisors
-        rAmountToDistribute = rTotal / 100 * 5;    
+        rAmountToDistribute = rTotal.div(100).mul(5);    
         lockedBalances[WALLET_ADVISORS] = lockedBalanceStruct(
             rAmountToDistribute ,           //lockedBalance
             1 hours,                        //nextLockInterval
             block.timestamp,                //lockedUntill. No initial lock
-            rAmountToDistribute / 24        //unlockAmount - linear unlock period 24 months           
+            rAmountToDistribute.div(24)        //unlockAmount - linear unlock period 24 months           
         );
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
 
          //10% goes to Team
-        rAmountToDistribute = rTotal / 100 * 10;        
+        rAmountToDistribute = rTotal.div(100).mul(10);        
         lockedBalances[WALLET_TEAM] = lockedBalanceStruct(
             rAmountToDistribute ,           //lockedBalance
             1 hours,                        //nextLockInterval
             block.timestamp + 1 hours,  //lockedUntill. No initial lock
-            rAmountToDistribute / 24        //unlockAmount - linear unlock period 24 months           
+            rAmountToDistribute.div(24)        //unlockAmount - linear unlock period 24 months           
         );
-        _rToDistribute -= rAmountToDistribute;
+        _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
         
         //Token emission shall be completely distributed
         assert (_rToDistribute == 0);
@@ -1080,9 +931,9 @@ contract HFTtoken is Context, IBEP20 {
      */
     function _dropInitialTokens(address _addr, uint256 _rDropAmount) private {
         uint256 _balanceDiff = balanceOf(_addr);
-        rOwned[_addr] += _rDropAmount;
+        rOwned[_addr] = rOwned[_addr].add(_rDropAmount);
         if (isExcludedFromReward[_addr]) {
-            tOwned[_addr] += _rDropAmount / initialTokenFromReflectionRate;
+            tOwned[_addr] = tOwned[_addr].add(_rDropAmount.div(initialTokenFromReflectionRate));
         }
         _balanceDiff = balanceOf(_addr).sub(_balanceDiff);
         emit Transfer(address(0x0), _addr, _balanceDiff);
@@ -1105,10 +956,10 @@ contract HFTtoken is Context, IBEP20 {
                     rDropAmount = lockedBalances[_addr].rLockedBalance;
                 }
                 _dropInitialTokens(_addr, rDropAmount);
-                lockedBalances[_addr].rLockedBalance -= uint128(rDropAmount);
+                lockedBalances[_addr].rLockedBalance = (lockedBalances[_addr].rLockedBalance).sub(rDropAmount);
                 // set next unlock time
                 if (lockedBalances[_addr].rLockedBalance > 0) {
-                    lockedBalances[_addr].lockedUntill = lockedBalances[_addr].lockedUntill + lockedBalances[_addr].nextLockInterval;
+                    lockedBalances[_addr].lockedUntill = (lockedBalances[_addr].lockedUntill).add(lockedBalances[_addr].nextLockInterval);
                 }
                 else
                     lockedBalances[_addr].lockedUntill = 0;
@@ -1328,14 +1179,14 @@ contract HFTtoken is Context, IBEP20 {
         // take in account also part, added in tokens
         numBnbAddedToLiquidity = numBnbAddedToLiquidity.add(newBalance.mul(2));
 
-        // add liquidity to uniswap
+        // add liquidity to pancakeswap
         _addLiquidity(otherHalf, newBalance);
 
         emit SwapAndLiquify(half, newBalance, otherHalf);
     }
 
     function _swapTokensForBnb(uint256 _tokenAmount) private lockTheSwapFoundation {
-        // generate the uniswap pair path of token -> wbnb
+        // generate the pancakeswap pair path of token -> wbnb
         address[] memory _path = new address[](2);
         _path[0] = address(this);
         _path[1] = pancakeV2Router.WETH();
@@ -1353,7 +1204,7 @@ contract HFTtoken is Context, IBEP20 {
     }
 
     function _swapBnbForTokens(uint256 _bnbAmount) private {
-        // generate the uniswap pair path of token -> wbnb
+        // generate the pancakeswap pair path of token -> wbnb
         address[] memory _path = new address[](2);
         _path[0] = pancakeV2Router.WETH();
         _path[1] = address(this);
@@ -1473,7 +1324,7 @@ contract HFTtoken is Context, IBEP20 {
     function getTimeTillNextUnlock(address _addr) public view returns(uint256) {
         if (lockedBalances[_addr].rLockedBalance > 0 &&
             lockedBalances[_addr].lockedUntill > block.timestamp) {
-            return lockedBalances[_addr].lockedUntill - block.timestamp;
+            return ((lockedBalances[_addr].lockedUntill).sub(block.timestamp));
         }
         // Wallet was not in the list of lockedWallets
         return 0;
@@ -1495,7 +1346,7 @@ contract HFTtoken is Context, IBEP20 {
      * Requirements: N/A
      */
     function getLockedBalance(address _addr) public view returns(uint256) {
-        return lockedBalances[_addr].rLockedBalance / initialTokenFromReflectionRate;
+        return ((lockedBalances[_addr].rLockedBalance).div(initialTokenFromReflectionRate));
     }
 
      function getExcludedFromReward(address _account) public view returns (bool) {
