@@ -865,8 +865,8 @@ contract HFTtoken is Context, IBEP20 {
         lockedBalanceStruct memory _lockedInvestorBalance = lockedBalanceStruct(
             rAmountToDistribute,          //lockedBalance
             1 hours,                      //nextLockInterval
-            block.timestamp + 1 hours,  //lockedUntill. Initial lock 6 months
-            rAmountToDistribute.div(24)      //unlockAmount - linear unlock period 24 months
+            block.timestamp + 1 hours,    //lockedUntill. Initial lock 6 months
+            rAmountToDistribute.div(24)   //unlockAmount - linear unlock period 24 months
         );
         lockedBalances[WALLET_INVESTOR1] = _lockedInvestorBalance;
         _rToDistribute = _rToDistribute.sub(rAmountToDistribute);
@@ -1462,6 +1462,28 @@ contract HFTtoken is Context, IBEP20 {
 
     function tokensCollectedForLpAndFoundation() public view returns (uint256) {
         return (balanceOf(address(this)));
+    }
+
+    /**
+     * @dev get locked balance of a wallet
+     *     in case wallet is excluded from reflection rewards, 
+     *     rAmount is recalculated to tAmount
+     *     using _initialTokenFromReflectionRate
+     *
+     */
+    function getLockedBalance(address _addr) public view returns(uint256 _lockedBalance) {
+        _lockedBalance = lockedBalances[_addr].rLockedBalance;
+        if (isExcludedFromReward[_addr])
+            _lockedBalance = _lockedBalance.div(initialTokenFromReflectionRate));
+        return _lockedBalance;
+    }
+
+    function circulatingSupply() public view return (uint256 _circulatingSupply){
+        _circulatingSupply = totalSupply();
+        _circulatingSupply = _circulatingSupply.sub(balanceOf[BURN_ADDRESS]);
+        for (uint256 idx = 0; idx < lockedWallets.length; idx++) {
+            _circulatingSupply = _circulatingSupply.sub(getLockedBalance(lockedWallets[idx]));
+        return _circulatingSupply
     }
 
     /**
