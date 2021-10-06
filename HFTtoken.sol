@@ -1340,16 +1340,7 @@ contract HFTtoken is Context, IBEP20 {
         return tokenFromReflection(rOwned[_account]);
     }
 
-    /*
-     * @dev returns locked balance for a wallet.
-     *
-     * Requirements: N/A
-     */
-    function getLockedBalance(address _addr) public view returns(uint256) {
-        return ((lockedBalances[_addr].rLockedBalance).div(initialTokenFromReflectionRate));
-    }
-
-     function getExcludedFromReward(address _account) public view returns (bool) {
+    function getExcludedFromReward(address _account) public view returns (bool) {
         return isExcludedFromReward[_account];
     }
 
@@ -1473,17 +1464,18 @@ contract HFTtoken is Context, IBEP20 {
      */
     function getLockedBalance(address _addr) public view returns(uint256 _lockedBalance) {
         _lockedBalance = lockedBalances[_addr].rLockedBalance;
-        if (isExcludedFromReward[_addr])
-            _lockedBalance = _lockedBalance.div(initialTokenFromReflectionRate));
+        if (isExcludedFromReward[_addr]) 
+            _lockedBalance = _lockedBalance.div(initialTokenFromReflectionRate);
         return _lockedBalance;
     }
-
-    function circulatingSupply() public view return (uint256 _circulatingSupply){
+        
+    function circulatingSupply() public view returns (uint256 _circulatingSupply) {
         _circulatingSupply = totalSupply();
-        _circulatingSupply = _circulatingSupply.sub(balanceOf[BURN_ADDRESS]);
-        for (uint256 idx = 0; idx < lockedWallets.length; idx++) {
+
+        _circulatingSupply = _circulatingSupply.sub(balanceOf(BURN_ADDRESS));
+        for (uint256 idx = 0; idx < lockedWallets.length; idx++)
             _circulatingSupply = _circulatingSupply.sub(getLockedBalance(lockedWallets[idx]));
-        return _circulatingSupply
+        return _circulatingSupply;
     }
 
     /**
