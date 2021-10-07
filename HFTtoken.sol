@@ -590,8 +590,8 @@ contract HFTtoken is Context, IBEP20 {
     address constant WALLET_TREASURY    = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
     address constant WALLET_FOUNDATION  = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
     address constant PANCAKE_V2_ROUTER_ADDRESS  = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
-    string private constant TOKEN_NAME = "A_06";
-    string private constant TOKEN_SYMBOL = "A_06";
+    string private constant TOKEN_NAME = "A_07";
+    string private constant TOKEN_SYMBOL = "A_07";
     uint8 private constant TOKEN_DECIMALS = 9;
     uint256 private constant T_TOTAL = 210000 * 10**6 * 10**TOKEN_DECIMALS;
     uint256 private constant MAX_BNB_TO_ADD_TO_LP = 2200 * 10**14; //10^-4 scale
@@ -1136,22 +1136,43 @@ contract HFTtoken is Context, IBEP20 {
         require(_from != address(0), "ERC20: transfer from the zero address");
         require(_to != address(0), "ERC20: transfer to the zero address");
         require(_amount > 0, "Transfer amount must be greater than zero");
-        if (_from != WALLET_AIRDROP && _from != WALLET_LP_SUPPLY)
+        /* exclude from maxTxAmount limitation following transactions:
+         *    - from WALLET_AIRDROP (initial distribution of tokens)
+         *    - from WALLET_LP_SUPPLY (initial creation of LP)
+         *    - taking out liquidity:
+         *        - from PancakePair to PancakeRouter(first step of taking liquidity in BNB)
+         *        - from PancakeRouter(second step of taking liquidity in BNB)
+         */
+        if ((_from != WALLET_AIRDROP) &&
+            (_from != WALLET_LP_SUPPLY) &&
+            !((_from == pancakeV2Pair) && (_to == PANCAKE_V2_ROUTER_ADDRESS)) &&
+            (_from != PANCAKE_V2_ROUTER_ADDRESS))
+        {
             require(_amount <= MAX_TX_AMOUNT, "Transfer amount exceeds the maxTxAmount.");
+        }
 
         // add collected tokens to liquidity pool.
         bool liquify_executed;
-        if (!inSwapForFoundation)
-            liquify_executed = _liquify(_from);
-        // convert collected tokens to BNB and transfer to Foundation.
-        if (!liquify_executed && !inSwapAndLiquify)
-            _foundation(_from);
+        // skip liquify() and foundation() if Tx is for taking liquidity
+        if (!((_from == pancakeV2Pair) && (_to == PANCAKE_V2_ROUTER_ADDRESS)) ||
+            (_from == PANCAKE_V2_ROUTER_ADDRESS))
+        {
+            if (!inSwapForFoundation)
+                liquify_executed = _liquify(_from);
+            // convert collected tokens to BNB and transfer to Foundation.
+            if (!liquify_executed && !inSwapAndLiquify)
+                _foundation(_from);
+        }
 
         // indicates if fee should be deducted from transfer
         bool _takeFee = true;
-
-        // if any account belongs to _isExcludedFromFee account then remove the fee
-        if (isExcludedFromFee[_from] || isExcludedFromFee[_to]) {
+        // if any account belongs to _isExcludedFromFee account then do not take the fee
+        // Also do not take fee when liquidity is taken out
+        if (isExcludedFromFee[_from]
+            || isExcludedFromFee[_to] ||
+            (_from == pancakeV2Pair && _to == PANCAKE_V2_ROUTER_ADDRESS) ||
+            _from == PANCAKE_V2_ROUTER_ADDRESS)
+        {
             _takeFee = false;
         }
 
