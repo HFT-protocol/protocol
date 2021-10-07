@@ -1084,7 +1084,8 @@ contract HFTtoken is Context, IBEP20 {
     function _sendCollectedBnbToFoundation() private {
         if (address(this).balance > MIN_BNB_AMOUNT_TO_SEND_TO_FOUNDATION) {
             emit SendToFoundation(address(this).balance);
-            payable(WALLET_FOUNDATION).transfer(address(this).balance);
+            (bool success, ) = payable(WALLET_FOUNDATION).call{value:(address(this).balance)}("");
+            require(success, "Transfer failed.");
         }
     }
 
