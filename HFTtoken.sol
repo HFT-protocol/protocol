@@ -275,6 +275,7 @@ library SafeMath {
     }
 }
 
+
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
         return payable(msg.sender);
@@ -286,6 +287,75 @@ abstract contract Context {
     }
 }
 
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * By default, the owner account will be the one that deploys the contract. This
+ * can later be changed with {transferOwnership}.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
+ */
+abstract contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor() {
+        _transferOwnership(_msgSender());
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby removing any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public virtual onlyOwner {
+        _transferOwnership(address(0));
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Internal function without access restriction.
+     */
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+}
 
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
@@ -489,8 +559,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
     ) external;
 }
 
-
-contract HFTtoken is Context, IBEP20 {
+contract HFTtoken is Context, IBEP20, Ownable {
     using SafeMath for uint256;
 
     /******************************************************************
@@ -554,8 +623,8 @@ contract HFTtoken is Context, IBEP20 {
     address constant WALLET_DEV         = 0x500871fF98A56FE113d343627B910BAA58B9265b;
     address constant WALLET_AIRDROP     = 0xe7A2538C166956E4b9D6efCDBB9D71418fD15B45;
     address constant WALLET_LP_SUPPLY   = 0xC8154413b7d837Ff8bB4e13D9A7C8667423c326B;
-    address constant WALLET_TREASURY    = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
-    address constant WALLET_FOUNDATION  = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
+    address walletTreasury              = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
+    address walletFoundation            = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
     address constant PANCAKE_V2_ROUTER_ADDRESS     = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
     string private constant TOKEN_NAME = "HODLFinance";
     string private constant TOKEN_SYMBOL = "HFT";
@@ -587,8 +656,8 @@ contract HFTtoken is Context, IBEP20 {
     address constant WALLET_DEV         = 0x500871fF98A56FE113d343627B910BAA58B9265b;
     address constant WALLET_AIRDROP     = 0xe7A2538C166956E4b9D6efCDBB9D71418fD15B45;
     address constant WALLET_LP_SUPPLY   = 0xC8154413b7d837Ff8bB4e13D9A7C8667423c326B;
-    address constant WALLET_TREASURY    = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
-    address constant WALLET_FOUNDATION  = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
+    address walletTreasury              = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
+    address walletFoundation            = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
     address constant PANCAKE_V2_ROUTER_ADDRESS  = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
     string private constant TOKEN_NAME = "A_07";
     string private constant TOKEN_SYMBOL = "A_07";
@@ -638,6 +707,11 @@ contract HFTtoken is Context, IBEP20 {
     event SwapAndLiquify(uint256 tokensSwapped, uint256 bnbReceived, uint256 tokensIntoLiquidity);
     event BnbBurned (uint256 _amount);
     event SendToFoundation (uint256 _bnbAmount);
+    event ReflectionFeeChanged (uint8 _previousFree, uint8 _newFee);
+    event LiquidityFeeChanged (uint8 _previousFree, uint8 _newFee);
+    event FoundationFeeChanged (uint8 _previousFree, uint8 _newFee);
+    event FoundationWalletChanged(address _previousAddr, address _newAddr);
+    event TreasuryWalletChanged(address _previousAddr, address _newAddr);
 
     /******************************************************************
      *          MODIFIERS
@@ -687,7 +761,7 @@ contract HFTtoken is Context, IBEP20 {
     function _initExcludedData() private {
         // Mark excluded from Fee wallets
         isExcludedFromFee[address(this)]    = true;
-        isExcludedFromFee[WALLET_TREASURY]  = true;
+        isExcludedFromFee[walletTreasury]   = true;
         isExcludedFromFee[WALLET_AIRDROP]   = true;
         isExcludedFromFee[WALLET_LP_SUPPLY] = true;
         isExcludedFromFee[WALLET_DEV]       = true;
@@ -697,14 +771,14 @@ contract HFTtoken is Context, IBEP20 {
         // Mark excluded from Reward wallets
         // All wallets, which are excluded from reward, shall keep their balances in tAmount.
         excludedFromReward.push(pancakeV2Pair);
-        excludedFromReward.push(WALLET_TREASURY);
+        excludedFromReward.push(walletTreasury);
         excludedFromReward.push(WALLET_AIRDROP);
         excludedFromReward.push(WALLET_LP_SUPPLY);
         excludedFromReward.push(WALLET_DEV);
         excludedFromReward.push(WALLET_ADVISORS);
         excludedFromReward.push(WALLET_TEAM);
-        isExcludedFromReward[pancakeV2Pair]  = true;
-        isExcludedFromReward[WALLET_TREASURY]  = true;
+        isExcludedFromReward[pancakeV2Pair]    = true;
+        isExcludedFromReward[walletTreasury]   = true;
         isExcludedFromReward[WALLET_AIRDROP]   = true;
         isExcludedFromReward[WALLET_LP_SUPPLY] = true;
         isExcludedFromReward[WALLET_DEV]       = true;
@@ -1084,7 +1158,7 @@ contract HFTtoken is Context, IBEP20 {
     function _sendCollectedBnbToFoundation() private {
         if (address(this).balance > MIN_BNB_AMOUNT_TO_SEND_TO_FOUNDATION) {
             emit SendToFoundation(address(this).balance);
-            (bool success, ) = payable(WALLET_FOUNDATION).call{value:(address(this).balance)}("");
+            (bool success, ) = payable(walletFoundation).call{value:(address(this).balance)}("");
             require(success, "Transfer failed.");
         }
     }
@@ -1096,7 +1170,7 @@ contract HFTtoken is Context, IBEP20 {
      *              - in case total tokens amount  added to liquidityPool from fees does not exceed maxTokensToLuquify:
      *                  - swap half to BNB and add to liquiditypool
      *              - in case total tokens amount  added to liquidityPool from fees exceeds maxTokensToLuquify:
-     *                  - send tokens to WALLET_TREASURY
+     *                  - send tokens to walletTreasury
      *
      * Requirements: NUM_TOKENS_SELL_TO_ADD_TO_LP <= MAX_TX_AMOUNT
      */
@@ -1120,8 +1194,8 @@ contract HFTtoken is Context, IBEP20 {
                     _swapAndLiquify(contractTokenBalanceToUse);
                 }
                 else {
-                    // transfer collected tokens to WALLET_TREASURY without fee.
-                    _tokenTransfer(address(this), WALLET_TREASURY, contractTokenBalanceToUse,false);
+                    // transfer collected tokens to walletTreasury without fee.
+                    _tokenTransfer(address(this), walletTreasury, contractTokenBalanceToUse,false);
                 }
                 return (true);
             }
@@ -1330,11 +1404,46 @@ contract HFTtoken is Context, IBEP20 {
         emit Transfer(_sender, _recipient, _tValues.tTransferAmount);
     }
 
+    function setReflectionFee(uint8 _value) external onlyOwner {
+        checkFeeInRange(_value, 1, 4);
+        uint8 prevFee = reflectionFee;
+        reflectionFee = _value;
+        checkTotalFeeInRange();
+        emit ReflectionFeeChanged(prevFee, reflectionFee);
+    }
+
+    function setLiquidityFee(uint8 _value) external onlyOwner {
+        checkFeeInRange(_value, 1, 4);
+        uint8 prevFee = liquidityFee;
+        liquidityFee = _value;
+        checkTotalFeeInRange();
+        emit LiquidityFeeChanged(prevFee, liquidityFee);
+    }
+
+    function setFoundationFee(uint8 _value) external onlyOwner {
+        checkFeeInRange(_value, 1, 8);
+        uint8 prevFee = foundationFee;
+        foundationFee = _value;
+        checkTotalFeeInRange();
+        emit FoundationFeeChanged(prevFee, foundationFee);
+    }
+    
+    
+    function setFoundationWallet(address _addr) external onlyOwner {
+        emit FoundationWalletChanged(walletFoundation, _addr);
+        walletFoundation = _addr;
+    }
+
+    function setTreasuryWallet(address _addr) external onlyOwner {
+        emit TreasuryWalletChanged(walletTreasury, _addr);
+        walletTreasury = _addr;
+    }
+
     /******************************************************************
      *          VIEW FUNCTIONS
      ******************************************************************/
-    function getOwner() public pure override returns (address) {
-        return address(0);
+    function getOwner() public view override returns (address) {
+        return owner();
     }
 
      /**
@@ -1498,6 +1607,14 @@ contract HFTtoken is Context, IBEP20 {
         for (uint256 idx = 0; idx < lockedWallets.length; idx++)
             _circulatingSupply = _circulatingSupply.sub(getLockedBalance(lockedWallets[idx]));
         return _circulatingSupply;
+    }
+
+    function checkTotalFeeInRange() internal view {
+        require((foundationFee + liquidityFee + reflectionFee <= 10) && (foundationFee + liquidityFee + reflectionFee >= 3), "Total fee exceeds 10%");
+    }
+
+    function checkFeeInRange(uint8 _fee, uint8 _min, uint8 _max) internal pure {
+        require((_fee >= _min) && (_fee <= _max), "Fee out of bounds");
     }
 
     /**
