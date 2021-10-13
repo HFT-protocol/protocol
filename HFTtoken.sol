@@ -624,6 +624,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
     address constant WALLET_AIRDROP     = 0xe7A2538C166956E4b9D6efCDBB9D71418fD15B45;
     address constant WALLET_LP_SUPPLY   = 0xC8154413b7d837Ff8bB4e13D9A7C8667423c326B;
     address walletTreasury              = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
+    address walletMarketingTreasury     = 0x0000000000000000000000000000000000000000;
     address walletFoundation            = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
     address constant PANCAKE_V2_ROUTER_ADDRESS     = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
     string private constant TOKEN_NAME = "HODLFinance";
@@ -657,6 +658,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
     address constant WALLET_AIRDROP     = 0xe7A2538C166956E4b9D6efCDBB9D71418fD15B45;
     address constant WALLET_LP_SUPPLY   = 0xC8154413b7d837Ff8bB4e13D9A7C8667423c326B;
     address walletTreasury              = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
+    address walletMarketingTreasury     = 0x0000000000000000000000000000000000000000;
     address walletFoundation            = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
     address constant PANCAKE_V2_ROUTER_ADDRESS  = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
     string private constant TOKEN_NAME = "A_07";
@@ -712,6 +714,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
     event FoundationFeeChanged (uint8 _previousFree, uint8 _newFee);
     event FoundationWalletChanged(address _previousAddr, address _newAddr);
     event TreasuryWalletChanged(address _previousAddr, address _newAddr);
+    event MarketingTreasuryWalletChanged(address _previousAddr, address _newAddr);
 
     /******************************************************************
      *          MODIFIERS
@@ -762,6 +765,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
         // Mark excluded from Fee wallets
         isExcludedFromFee[address(this)]    = true;
         isExcludedFromFee[walletTreasury]   = true;
+        isExcludedFromFee[walletMarketingTreasury]   = true;
         isExcludedFromFee[WALLET_AIRDROP]   = true;
         isExcludedFromFee[WALLET_LP_SUPPLY] = true;
         isExcludedFromFee[WALLET_DEV]       = true;
@@ -772,6 +776,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
         // All wallets, which are excluded from reward, shall keep their balances in tAmount.
         excludedFromReward.push(pancakeV2Pair);
         excludedFromReward.push(walletTreasury);
+        excludedFromReward.push(walletMarketingTreasury);
         excludedFromReward.push(WALLET_AIRDROP);
         excludedFromReward.push(WALLET_LP_SUPPLY);
         excludedFromReward.push(WALLET_DEV);
@@ -779,6 +784,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
         excludedFromReward.push(WALLET_TEAM);
         isExcludedFromReward[pancakeV2Pair]    = true;
         isExcludedFromReward[walletTreasury]   = true;
+        isExcludedFromReward[walletMarketingTreasury]   = true;
         isExcludedFromReward[WALLET_AIRDROP]   = true;
         isExcludedFromReward[WALLET_LP_SUPPLY] = true;
         isExcludedFromReward[WALLET_DEV]       = true;
@@ -1170,7 +1176,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
      *              - in case total tokens amount  added to liquidityPool from fees does not exceed maxTokensToLuquify:
      *                  - swap half to BNB and add to liquiditypool
      *              - in case total tokens amount  added to liquidityPool from fees exceeds maxTokensToLuquify:
-     *                  - send tokens to walletTreasury
+     *                  - send tokens to walletMarketingTreasury
      *
      * Requirements: NUM_TOKENS_SELL_TO_ADD_TO_LP <= MAX_TX_AMOUNT
      */
@@ -1194,8 +1200,8 @@ contract HFTtoken is Context, IBEP20, Ownable {
                     _swapAndLiquify(contractTokenBalanceToUse);
                 }
                 else {
-                    // transfer collected tokens to walletTreasury without fee.
-                    _tokenTransfer(address(this), walletTreasury, contractTokenBalanceToUse,false);
+                    // transfer collected tokens to walletMarketingTreasury without fee.
+                    _tokenTransfer(address(this), walletMarketingTreasury, contractTokenBalanceToUse,false);
                 }
                 return (true);
             }
@@ -1437,6 +1443,11 @@ contract HFTtoken is Context, IBEP20, Ownable {
     function setTreasuryWallet(address _addr) external onlyOwner {
         emit TreasuryWalletChanged(walletTreasury, _addr);
         walletTreasury = _addr;
+    }
+
+    function setMarketingTreasuryWallet(address _addr) external onlyOwner {
+        emit MarketingTreasuryWalletChanged(walletMarketingTreasury, _addr);
+        walletMarketingTreasury = _addr;
     }
 
     /******************************************************************
