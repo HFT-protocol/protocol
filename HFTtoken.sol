@@ -606,29 +606,29 @@ contract HFTtoken is Context, IBEP20, Ownable {
 
     /******************************************************************
      *          CONFIGURATION
-     ******************************************************************
+     ******************************************************************/
     address constant BURN_ADDRESS       = 0x000000000000000000000000000000000000dEaD;
-    address constant WALLET_INVESTOR1   = 0xeEaB9b2561773F109444D9629bed9518CE1274A7;
-    address constant WALLET_INVESTOR2   = 0x8927F63497080FB284d1aE7d13d6F7b6f4E64bFa;
-    address constant WALLET_INVESTOR3   = 0xB487B2249204AF5CEE4411D550a0C24ED62207c1;
-    address constant WALLET_INVESTOR4   = 0x84E9f6F1d6E2d7eb1b1F62c57826a89951c17a6B;
-    address constant WALLET_INVESTOR5   = 0x013f2c3eDbF7012b06293888F9a7ca5d2545a1Cc;
-    address constant WALLET_INVESTOR6   = 0x417fD7fE60EfE2Aed57815C4bB1aF1eE071E7013;
-    address constant WALLET_INVESTOR7   = 0x3238Df3F91306e795B58eFd116d10AE7ff53762d;
-    address constant WALLET_INVESTOR8   = 0xDc787834614F55Ed8805E6ACc46243459481cF50;
-    address constant WALLET_INVESTOR9   = 0xeecb15Ee2332f8fD139CfFB5A4a1835F4414dc27;
-    address constant WALLET_INVESTOR10  = 0xfFE6FeBF442Cd060CE41EaCd181494638e63B455;
-    address constant WALLET_ADVISORS    = 0x4E147d6C700173EB294e701D088Fb47EC72D05c7;
-    address constant WALLET_TEAM        = 0xCE25Cb2dED9062Dd82793b7F7f2Ce8a2c11d4f08;
-    address constant WALLET_DEV         = 0x500871fF98A56FE113d343627B910BAA58B9265b;
-    address constant WALLET_AIRDROP     = 0xe7A2538C166956E4b9D6efCDBB9D71418fD15B45;
-    address constant WALLET_LP_SUPPLY   = 0xC8154413b7d837Ff8bB4e13D9A7C8667423c326B;
-    address walletTreasury              = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
-    address walletMarketingTreasury     = 0x0000000000000000000000000000000000000000;
-    address walletFoundation            = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
+    address constant WALLET_INVESTOR1   = 0x0216b528Fc3Bffc8Cd6C4A243eF5A9d2a5A1924D;
+    address constant WALLET_INVESTOR2   = 0x9c2653d038431341932FEaCBCC3D82fCe4082a6f;
+    address constant WALLET_INVESTOR3   = 0xD783b025eAa9bad5985C9C3d18D043CA18611184;
+    address constant WALLET_INVESTOR4   = 0x43b88dd0399eb25423c24C1B7B089536d1bE7524;
+    address constant WALLET_INVESTOR5   = 0x0C5b92D14e7c9c3cE0Dd7A6C7a7a56dE5aB85e65;
+    address constant WALLET_INVESTOR6   = 0x147a0461d64B0A6C951b262B770719e18505872e;
+    address constant WALLET_INVESTOR7   = 0x5875f93CF665Afb7DfF7bf5a2Bd831C9495DbA33;
+    address constant WALLET_INVESTOR8   = 0x31e1f16477D29eC32b4dbA58b3c16D3D5fD2DFCd;
+    address constant WALLET_INVESTOR9   = 0x923f574Fe41DdA91D0260f1A155076Bc8B1508E1;
+    address constant WALLET_INVESTOR10  = 0x7d1F229A77886902BbAC3B1e398278514448365D;
+    address constant WALLET_ADVISORS    = 0xcE6d4fa1FC0D34688786eC393486B397f36b604e;
+    address constant WALLET_TEAM        = 0x71E60d9ff7b0e3Ae8c88b7e745AF9E1D674e70d1;
+    address constant WALLET_DEV         = 0xC02C70ea459Ad02f16246b87f33b277a5C8B099E;
+    address constant WALLET_AIRDROP     = 0x12a0e4F141E2a7FdC9652E4aB6970a0C560A4e5E;
+    address constant WALLET_LP_SUPPLY   = address(0x0);
+    address walletTreasury              = address(0x0);
+    address walletMarketingTreasury     = 0x12F90e3369c3BeCd48f138E7D19e1521Feece9Fb;
+    address walletFoundation            = 0x571A5872a4BA11479780006647AC2a81A7dF1855;
     address constant PANCAKE_V2_ROUTER_ADDRESS     = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
-    string private constant TOKEN_NAME = "HODLFinance";
-    string private constant TOKEN_SYMBOL = "HFT";
+    string private constant TOKEN_NAME = "Test-01";
+    string private constant TOKEN_SYMBOL = "Test token";
     uint8 private constant TOKEN_DECIMALS = 9;
     uint256 private constant T_TOTAL = 210000 * 10**6 * 10**TOKEN_DECIMALS;
     uint256 private constant MAX_BNB_TO_ADD_TO_LP = 2200 * 10**18;
@@ -640,7 +640,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
 
     /******************************************************************
      *          TEST CONFIGURATION
-     ******************************************************************/
+     ******************************************************************
     address constant BURN_ADDRESS       = 0x000000000000000000000000000000000000dEaD;
     address constant WALLET_INVESTOR1   = 0xeEaB9b2561773F109444D9629bed9518CE1274A7;
     address constant WALLET_INVESTOR2   = 0x8927F63497080FB284d1aE7d13d6F7b6f4E64bFa;
@@ -680,6 +680,9 @@ contract HFTtoken is Context, IBEP20, Ownable {
      *          TOKEN
      ******************************************************************/
     uint256 private constant MAX = ~uint256(0);
+
+    uint256 private idxEFRWalletMarketingTreasury;
+    uint256 private idxEFRWalletTreasury;
 
     uint256 private rTotal = (MAX - (MAX % T_TOTAL));
     uint256 private tFeeTotal;
@@ -776,7 +779,9 @@ contract HFTtoken is Context, IBEP20, Ownable {
         // All wallets, which are excluded from reward, shall keep their balances in tAmount.
         excludedFromReward.push(pancakeV2Pair);
         excludedFromReward.push(walletTreasury);
-        excludedFromReward.push(walletMarketingTreasury);
+        idxEFRWalletTreasury = excludedFromReward.length - 1;
+        excludedFromReward.push(walletMarketingTreasury) ;
+        idxEFRWalletMarketingTreasury = excludedFromReward.length - 1;
         excludedFromReward.push(WALLET_AIRDROP);
         excludedFromReward.push(WALLET_LP_SUPPLY);
         excludedFromReward.push(WALLET_DEV);
@@ -1442,11 +1447,28 @@ contract HFTtoken is Context, IBEP20, Ownable {
 
     function setTreasuryWallet(address _addr) external onlyOwner {
         emit TreasuryWalletChanged(walletTreasury, _addr);
+
+        //update isExcludedFromFee
+        isExcludedFromFee[walletTreasury] = false;
+        isExcludedFromFee[_addr] = true;
+        //update isExcludedFromReward
+        isExcludedFromReward[walletTreasury] = false;
+        isExcludedFromReward[_addr] = true;
+        excludedFromReward[idxEFRWalletTreasury] = _addr;
+
         walletTreasury = _addr;
     }
 
     function setMarketingTreasuryWallet(address _addr) external onlyOwner {
         emit MarketingTreasuryWalletChanged(walletMarketingTreasury, _addr);
+        //update isExcludedFromFee
+        isExcludedFromFee[walletMarketingTreasury] = false;
+        isExcludedFromFee[_addr] = true;
+        //update isExcludedFromReward
+        isExcludedFromReward[walletMarketingTreasury] = false;
+        isExcludedFromReward[_addr] = true;
+        excludedFromReward[idxEFRWalletMarketingTreasury] = _addr;
+
         walletMarketingTreasury = _addr;
     }
 
