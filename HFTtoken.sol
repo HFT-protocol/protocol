@@ -627,8 +627,8 @@ contract HFTtoken is Context, IBEP20, Ownable {
     address walletMarketingTreasury     = 0x12F90e3369c3BeCd48f138E7D19e1521Feece9Fb;
     address walletFoundation            = 0x571A5872a4BA11479780006647AC2a81A7dF1855;
     address constant PANCAKE_V2_ROUTER_ADDRESS     = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
-    string private constant TOKEN_NAME = "Test-01";
-    string private constant TOKEN_SYMBOL = "Test token";
+    string private constant TOKEN_NAME = "Hodl Finance";
+    string private constant TOKEN_SYMBOL = "HFT";
     uint8 private constant TOKEN_DECIMALS = 9;
     uint256 private constant T_TOTAL = 210000 * 10**6 * 10**TOKEN_DECIMALS;
     uint256 private constant MAX_BNB_TO_ADD_TO_LP = 2200 * 10**18;
@@ -811,7 +811,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
      * Requirements: initExcludedData() shall be aready executed before this function call
      */
 
-    /*****************REALWORLD CONFIGURATION *******************************
+    /*****************REALWORLD CONFIGURATION *******************************/
     function _initialDistribution() private {
         // Initial distribution
         uint256 rAmountToDistribute;
@@ -908,9 +908,9 @@ contract HFTtoken is Context, IBEP20, Ownable {
         // Token emission shall be completely distributed
         assert (_rToDistribute == 0);
     }
-/*
 
-    /********** TEST CONFIGURATION ********************/
+
+    /********** TEST CONFIGURATION ********************
     function _initialDistribution() private {
         //Initial distribution
         uint256 rAmountToDistribute;
@@ -1006,7 +1006,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
         
         //Token emission shall be completely distributed
         assert (_rToDistribute == 0);
-    }
+    }*/
 
     /**
      * @dev used for distribution of initial tokens.
@@ -1633,18 +1633,16 @@ contract HFTtoken is Context, IBEP20, Ownable {
      *
      */
     function getLockedBalance(address _addr) public view returns(uint256 _lockedBalance) {
-        _lockedBalance = lockedBalances[_addr].rLockedBalance;
-        if (isExcludedFromReward[_addr]) 
-            _lockedBalance = _lockedBalance.div(initialTokenFromReflectionRate);
+        _lockedBalance = (lockedBalances[_addr].rLockedBalance).div(initialTokenFromReflectionRate);
         return _lockedBalance;
     }
         
     function circulatingSupply() public view returns (uint256 _circulatingSupply) {
         _circulatingSupply = totalSupply();
 
-        _circulatingSupply = _circulatingSupply.sub(balanceOf(BURN_ADDRESS));
         for (uint256 idx = 0; idx < lockedWallets.length; idx++)
             _circulatingSupply = _circulatingSupply.sub(getLockedBalance(lockedWallets[idx]));
+
         return _circulatingSupply;
     }
 
