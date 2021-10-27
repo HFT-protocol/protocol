@@ -1457,6 +1457,9 @@ contract HFTtoken is Context, IBEP20, Ownable {
         excludedFromReward[idxEFRWalletTreasury] = _addr;
 
         walletTreasury = _addr;
+
+        //For wallet, excluded from reward, rOwned shall be converted to tOwned
+        tOwned[walletTreasury] = tokenFromReflection(rOwned[walletTreasury]);
     }
 
     function setMarketingTreasuryWallet(address _addr) external onlyOwner {
@@ -1470,6 +1473,9 @@ contract HFTtoken is Context, IBEP20, Ownable {
         excludedFromReward[idxEFRWalletMarketingTreasury] = _addr;
 
         walletMarketingTreasury = _addr;
+
+        //For wallet, excluded from reward, rOwned shall be converted to tOwned
+        tOwned[walletMarketingTreasury] = tokenFromReflection(rOwned[walletMarketingTreasury]);
     }
 
     /******************************************************************
