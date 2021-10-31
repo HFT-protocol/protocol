@@ -623,7 +623,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
     address constant WALLET_DEV         = 0xC02C70ea459Ad02f16246b87f33b277a5C8B099E;
     address constant WALLET_AIRDROP     = 0x12a0e4F141E2a7FdC9652E4aB6970a0C560A4e5E;
     address constant WALLET_LP_SUPPLY   = 0x4eF11CE49D4336ab764e5Ee3da35fdCD55436Ad5;
-    address walletTreasury              = 0x0A9591de91F1DC3ca99Ea0F512ff0d01E3449964;
+    address walletTreasury              = 0x798A3F02885423420901c843Ff2B8f53a68a300c;
     address walletMarketingTreasury     = 0x12F90e3369c3BeCd48f138E7D19e1521Feece9Fb;
     address walletFoundation            = 0x571A5872a4BA11479780006647AC2a81A7dF1855;
     address constant PANCAKE_V2_ROUTER_ADDRESS     = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
