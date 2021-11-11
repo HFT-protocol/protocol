@@ -623,6 +623,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
     address constant WALLET_DEV         = 0xC02C70ea459Ad02f16246b87f33b277a5C8B099E;
     address constant WALLET_AIRDROP     = 0x12a0e4F141E2a7FdC9652E4aB6970a0C560A4e5E;
     address constant WALLET_LP_SUPPLY   = 0x4eF11CE49D4336ab764e5Ee3da35fdCD55436Ad5;
+    address constant WALLET_BULKSENDER  = 0xFFe2B46e8A5855DDEa901F562Ee51898C9973EC0;
     address walletTreasury              = 0x798A3F02885423420901c843Ff2B8f53a68a300c;
     address walletMarketingTreasury     = 0x12F90e3369c3BeCd48f138E7D19e1521Feece9Fb;
     address walletFoundation            = 0x571A5872a4BA11479780006647AC2a81A7dF1855;
@@ -636,40 +637,6 @@ contract HFTtoken is Context, IBEP20, Ownable {
     uint256 private constant NUM_TOKENS_SELL_TO_ADD_TO_LP = 10 * 10**6 * 10**TOKEN_DECIMALS;
     uint256 private constant NUM_TOKENS_SELL_TO_SEND_TO_FOUNDATION = 15 * 10**6 * 10**TOKEN_DECIMALS;
     uint256 private constant MIN_BNB_AMOUNT_TO_SEND_TO_FOUNDATION = 1 * 10**18; //1 bnb
-    /*   END OF CONFIGURATION   */
-
-    /******************************************************************
-     *          TEST CONFIGURATION
-     ******************************************************************
-    address constant BURN_ADDRESS       = 0x000000000000000000000000000000000000dEaD;
-    address constant WALLET_INVESTOR1   = 0xeEaB9b2561773F109444D9629bed9518CE1274A7;
-    address constant WALLET_INVESTOR2   = 0x8927F63497080FB284d1aE7d13d6F7b6f4E64bFa;
-    address constant WALLET_INVESTOR3   = 0xB487B2249204AF5CEE4411D550a0C24ED62207c1;
-    address constant WALLET_INVESTOR4   = 0x84E9f6F1d6E2d7eb1b1F62c57826a89951c17a6B;
-    address constant WALLET_INVESTOR5   = 0x013f2c3eDbF7012b06293888F9a7ca5d2545a1Cc;
-    address constant WALLET_INVESTOR6   = 0x417fD7fE60EfE2Aed57815C4bB1aF1eE071E7013;
-    address constant WALLET_INVESTOR7   = 0x3238Df3F91306e795B58eFd116d10AE7ff53762d;
-    address constant WALLET_INVESTOR8   = 0xDc787834614F55Ed8805E6ACc46243459481cF50;
-    address constant WALLET_INVESTOR9   = 0xeecb15Ee2332f8fD139CfFB5A4a1835F4414dc27;
-    address constant WALLET_INVESTOR10  = 0xfFE6FeBF442Cd060CE41EaCd181494638e63B455;
-    address constant WALLET_ADVISORS    = 0x4E147d6C700173EB294e701D088Fb47EC72D05c7;
-    address constant WALLET_TEAM        = 0xCE25Cb2dED9062Dd82793b7F7f2Ce8a2c11d4f08;
-    address constant WALLET_DEV         = 0x500871fF98A56FE113d343627B910BAA58B9265b;
-    address constant WALLET_AIRDROP     = 0xe7A2538C166956E4b9D6efCDBB9D71418fD15B45;
-    address constant WALLET_LP_SUPPLY   = 0xC8154413b7d837Ff8bB4e13D9A7C8667423c326B;
-    address walletTreasury              = 0x06DA1389306E216dC9Ecf4Ed1a5c65CB278937a1;
-    address walletMarketingTreasury     = 0x0000000000000000000000000000000000000000;
-    address walletFoundation            = 0x239316cc24973B3AFDEa9Cc2c7Fe86CED685a562;
-    address constant PANCAKE_V2_ROUTER_ADDRESS  = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
-    string private constant TOKEN_NAME = "A_07";
-    string private constant TOKEN_SYMBOL = "A_07";
-    uint8 private constant TOKEN_DECIMALS = 9;
-    uint256 private constant T_TOTAL = 210000 * 10**6 * 10**TOKEN_DECIMALS;
-    uint256 private constant MAX_BNB_TO_ADD_TO_LP = 2200 * 10**14; //10^-4 scale
-    uint256 public constant MAX_TX_AMOUNT = 420 * 10**6 * 10**TOKEN_DECIMALS;
-    uint256 private constant NUM_TOKENS_SELL_TO_ADD_TO_LP = 10 * 10**6 * 10**TOKEN_DECIMALS;
-    uint256 private constant NUM_TOKENS_SELL_TO_SEND_TO_FOUNDATION = 15 * 10**6 * 10**TOKEN_DECIMALS;
-    uint256 private constant MIN_BNB_AMOUNT_TO_SEND_TO_FOUNDATION = 1 * 10**16; //0.01 bnb
     /*   END OF CONFIGURATION   */
 
     bool private inSwapAndLiquify;
@@ -774,6 +741,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
         isExcludedFromFee[WALLET_DEV]       = true;
         isExcludedFromFee[WALLET_ADVISORS]  = true;
         isExcludedFromFee[WALLET_TEAM]      = true;
+        isExcludedFromFee[WALLET_BULKSENDER] = true;
 
         // Mark excluded from Reward wallets
         // All wallets, which are excluded from reward, shall keep their balances in tAmount.
@@ -1231,6 +1199,7 @@ contract HFTtoken is Context, IBEP20, Ownable {
          */
         if ((_from != WALLET_AIRDROP) &&
             (_from != WALLET_LP_SUPPLY) &&
+            (_from != WALLET_BULKSENDER) &&
             !((_from == pancakeV2Pair) && (_to == PANCAKE_V2_ROUTER_ADDRESS)) &&
             (_from != PANCAKE_V2_ROUTER_ADDRESS))
         {
